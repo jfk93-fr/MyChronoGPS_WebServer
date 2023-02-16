@@ -34,6 +34,10 @@
 # Lancement MyChronoGPS_WebServer
 
 	Ouvrir une fenêtre Terminal
+
+	Se placer dans le dossier MyChronoGPS_WebServer
+	>cd $HOME/MyChronoGPS_WebServer
+	
 	Passer la commande :
 	>python3 MyChronoGPS_WebServer.py
 	
