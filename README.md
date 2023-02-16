@@ -40,7 +40,6 @@
 	
 	Passer la commande :
 	>python3 MyChronoGPS_WebServer.py
-	
 
 # Utilisation
 	
