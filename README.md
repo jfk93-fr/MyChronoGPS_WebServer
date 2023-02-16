@@ -2,7 +2,8 @@
 
 	MyChronoGPS_WebServer est un complément de MyChronoGPS (https://github.com/jfk93-fr/MyChronoGPS)
 	Permet de voir des sessions ou des circuits récupérés à partir des téléchargements issus de MyChronoGPS.
-	Utile pour analyser les données sans utiliser MyChronboGPS et pour partager ou utiliser des sessions de roulage.
+	Utile pour analyser les données sans utiliser MyChronoGPS
+	et pour partager ou utiliser des sessions de roulage.
 	
 # Installation
 
@@ -17,7 +18,9 @@
 	. Prérequis : Python installé sur le PC.
 	
 	Télécharger et installer l'archive .zip dans un dossier
-	Ouvrir une fenêtre invite de commande, se placer dans le dossier d'installation de MyChronoGPS_WebServer et saisir la commande suivante :
+	Ouvrir une fenêtre invite de commande
+	Se placer dans le dossier d'installation de MyChronoGPS_WebServer
+	Saisir la commande suivante :
 	
 	>python MyChronoGPS_WebServer.py
 	
