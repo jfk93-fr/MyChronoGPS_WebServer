@@ -1,0 +1,195 @@
+Attention dans le texte qui suit, toutes les lignes commençant par $ représente une commande à passer.
+Le caractère $ repréente l'invite de commande, il ne fait pas partie de la commande et ne doit pas être écrit.
+Exemple :
+$ cd /home/pi
+signifie qu'il faut écrire
+cd /home/pi
+
+MyChronoGPS fonctionne sur des Raspberry 2,3,4 et zero
+Les rpi 3 et au delà ou zeroW v2 sont recommandés 
+
+Création et installation d'une carte SD contenant MyChronoGPS
+Avec l'outil Pi Imager
+A partir d'un PC Windows, télécharger Raspberry Pi Imager et l'installer
+A partir d'un Raspberry, Pi Imager est déjà installé.
+1 - Lancez Pi Imager
+2 - Choisir l'OS selon le Raspberry destiné à accueillir MyChronoGPS (32-bit tout type de rpi, 64-bit rpi 3,4,400) de préférence avec l'environnement de bureau.
+3 - Allez dans les paramètres de Pi Imager
+    Cochez la case Enable SSH.
+	La case Username and password est automatiquement cochée.
+	Laissez Username à pi et entrez le password, chrono par exemple, notez le password.
+	Cochez la case Configure wireless LAN et entrez les paramètres de votre réseau Wifi local.
+	Cochez la case Set locale settings et entrez votre zone géographique et le type de clavier.
+	Sauvegardez les paramètres.
+4 - Installez la carte SD dans le lecteur et Allez dans Choose Storage
+	Le lecteur est automatiquement sélectionné, s'il y en a plusieurs choisir le lecteur dans lequel la carte SD cible est installée.
+5 - Retirez la carte SD et installez-là dans le Raspberry cible.
+6 	Démarrez le raspberry
+
+La suite de l'installation s'effectue à partir du rpi ou via une connexion ssh.
+
+Terminer la config du Raspberry
+Passer la commande :
+$ sudo raspi-config
+3 - Interface Options
+	P5 I2C => Oui
+	P6 Serial Port => shell:non / serial port hardware:oui
+
+A la fin de la configuration faire un reboot
+	$ sudo reboot
+
+Installer les outils I2C pour Python (déjà installé sur les versions récentes)
+Mettre à jour le système (s'il y a longtemps que ça n'a pas été fait)
+	$ sudo apt update
+	$ sudo apt upgrade -y
+
+En cas d'utilisation d'un écran OLED avec interface I2C
+Vérifier l’adresse du périphérique avec i2cdetect
+	$ sudo i2cdetect -y 1
+	(pour les anciens modèles : $ sudo i2cdetect -y 0)
+	
+installer la librairie pour l'accès aux gpio
+	$ sudo pip install gpio
+
+Ensuite, il est nécessaire d'installer un serveur web pour avoir accès aux outils de visualisation des sessions et de la gestion des circuits.
+Il est également nécessaire pour l'affichage du tableau de bord sur un écran LCD (minimum 3.5" 480x360 recommandé)
+
+Installation de MyChronoGPS sur le rpi
+
+A partir du dossier /home/pi lancez les commandes suivantes :
+	$ sudo rm -rf MyChronoGPS
+	$ git clone https://github.com/jfk93-fr/MyChronoGPS.git
+	$ chmod -R 755 MyChronoGPS
+	$ cd MyChronoGPS/
+
+La procédure d'installation proprement dite de MyChronoGPS s'effectue par la commande :
+	$ sh MyChronoGPS.sh
+
+Plusieurs questions sont posées.
+Si Lighttpd n'est pas installé, la procédure d'installation demande si on doit l'installer, c'est préférable, aussi répondre Y
+
+La procédure d'installation demande si on a une clé API pour GoogleMaps et si on veut l'utiliser.
+Si oui, le fichier key.js est édité et il faut remplacer 'Your_API_Key' par la valeur de votre clé.
+
+A la fin de l'installation, redémarrer le système
+$ sudo reboot
+
+=============================================================================================================
+Installation physique du GPS
+Le fichier paramètre de MyChronoGPS est configuré pour un GPS relié au Raspberry via une liaison série.
+Si c'est le cas, passer la commande :
+	$ cat /dev/serial0
+	
+les trames envoyées par le GPS doivent s'afficher sur la console.
+
+Si le GPS est relié via le port USB, rechercher le fichier associé.
+Le fichier devrait avoir un nom sous la forme /etc/ttyACM*
+Pour afficher le nom, passer la commande
+	$ ls /dev/ttyA*
+
+exemple :
+	pi@raspberrypi:~ $ ls /dev/ttyA*
+	/dev/ttyACM0  /dev/ttyAMA0
+	pi@raspberrypi:~ $
+
+Il faut essayer de trouver le bon fichier en passant la commande :
+	pi@raspberrypi:~ $ cat /dev/ttyAMA0
+	pi@raspberrypi:~ $
+
+Il n'y a rien en retour, essayer avec :
+	pi@raspberrypi:~ $ cat /dev/ttyACM0
+	$GNTXT,01,01,02,u-blox AG - www.u-blox.com*4E
+	
+	$GNTXT,01,01,02,HW UBX-M8030 00080000*60
+	
+	$GNTXT,01,01,02,ROM CORE 3.01 (107888)*2B
+
+Ce sont les trames NMEA envoyées par le GPS
+	/dev/ttyACM0
+
+Mettre à jour le fichier paramètre de MyChronoGPS en passant la commande
+$ sudo nano /home/pi/MyChronoGPS/parms/params.json
+Rechercher les lignes contenant "GPSPort"
+
+    "#GPSPort": "port rattaché au GPS (defaut; /dev/serial0)",
+    "GPSPort": "/dev/serial0",
+    "GPSPort": "/dev/ttyACM1",
+    "GPSPort": "/dev/ttyACM0",
+
+C'est la dernière ligne qui est prise en compte.
+Dans l'exemple ci-dessus, le GPS est associé au fichier /dev/ttyACM0
+=============================================================================================================
+Ce qui suit est nécessaire pour les afficheurs OLED:
+
+installer Adafruit_GPIO :
+$ sudo  pip  install Adafruit_GPIO
+
+installer Adafruit_SSD1306 :
+$ sudo  pip  install Adafruit_SSD1306
+
+installer mscorefonts :
+$ sudo  apt-get install ttf-mscorefonts-installer
+=============================================================================================================
+
+Ce qui suit est nécessaire pour les écrans TFT LCD Touch Screen:
+Configurer l’écran 3.5 inch TFT LCD Touch Screen avec le Raspberry Pi
+
+$ sudo rm -rf LCD-show
+$ git clone https://github.com/goodtft/LCD-show.git
+$ chmod -R 755 LCD-show
+$ cd LCD-show/
+$ sudo ./LCD35-show
+Après redémarrage du Raspberry Pi vous devriez voir apparaitre le desktop de Raspbian sur votre petit écran.
+
+Pour faire pivoter l'affichage de 180° :
+$ cd LCD-show/
+$ sudo ./rotate.sh 180
+Après redémarrage du Raspberry Pi l'affiche sur l'écran a pivoté de 180°.
+
+Désactiver l’écran LCD 3.5 du raspberry pi et retourner vers un écran HDMI
+$ chmod -R 755 LCD-show
+$ cd LCD-show/
+$ sudo ./LCD-hdmi
+
+=============================================================================================================
+Lancer MyChronoGPS au démarrage
+Editer le fichier /etc/rc.local
+$ sudo nano /etc/rc.local
+avant la ligne exit 0 insérer la commande pour démarrer MyChronoGPS au démarrage du Rpi :
+sh /home/pi/MyChronoGPS/start_gps.sh
+=============================================================================================================
+
+Pour lancer le tableau de bord au démarrage du pi, à partir du répertoire MyChronoGPS, lancez la commande suivante :
+	$ sh ./CreateAutostart.sh
+
+Utilisation de Google Maps API
+Par défaut, MyChronoGPS utilise Leaflet pour les outils analyse et design track.
+Si vous possédez une clé pour l'API Google Maps, vous pouvez demander à MyChronoGPS d'utiliser GoogleMaps à la place de Leaflet.
+Pour çà, dans le répertoire MyChronoGPS, effectuer les actions suivantes :
+	$ sh MyChronoGPS_GoogleMaps.sh
+A l'édition du fichier /var/www/html/js/key.js par nano
+Modifiez la ligne
+	var myKey = 'Your_API_Key';
+en remplacant le texte par votre clé API.
+Sauvez le fichier modifié.
+
+Il est également possible de revenir à l'utilisation de Leaflet à la place de GoogleMaps.
+Pour çà, dans le répertoire MyChronoGPS, effectuer les actions suivantes :
+	$ sh MyChronoGPS_Leaflet.sh
+
+=============================================================================================================
+Ci-dessous, quelques commandes utiles pour le dépannage
+=============================================================================================================
+	$ lsusb # affichage des périphériques USB connecté au Raspberry (utile si GPS USB)
+	$ ls /dev/tty* # affichage des ports des périphériques (serial0, ttyACM0, ttyAMA0, etc)
+	$ ps -ef | grep MyChronoGPS # affichage des processus MyChronoGPS
+	
+Erreurs Web
+500 – pour avoir le détail, passer la commande 
+	$ systemctl status lighttpd.service
+
+Consultez les fichiers log :
+"/var/log/lighttpd/error.log"
+
+Désinstaller lighttpd et php
+$ sudo apt-get remove lighttpd php7.4-fpm php7.4-mbstring php7.4-mysql php7.4-curl php7.4-gd php7.4-zip php7.4-xml

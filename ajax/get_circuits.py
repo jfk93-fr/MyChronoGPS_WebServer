@@ -2,14 +2,13 @@
 # -*- coding: UTF-8 -*-
 dir = "userdata/tracks"
 import glob 
-#import os.path
 import os
 import json
 print('Content-Type: text-plain; charset=utf-8\r\n\r\n')
 
 def listdirectory(path): 
     fichier=[] 
-    l = glob.glob(path+'\\*') 
+    l = glob.glob(path+'/*') 
     for i in l: 
         if os.path.isdir(i): fichier.extend(listdirectory(i)) 
         else: fichier.append(i) 
